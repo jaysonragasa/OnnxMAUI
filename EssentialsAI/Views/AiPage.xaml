@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:vm="clr-namespace:EssentialsAI.ViewModels"
+	x:Class="EssentialsAI.Views.AiPage"
+	x:DataType="vm:AiViewModel"
+	Title="AI Playground">
+
+	<Grid
+		RowDefinitions="Auto,*,Auto"
+		Padding="10,20">
+
+		<!-- Header -->
+		<VerticalStackLayout
+			Grid.Row="0"
+			Spacing="10"
+			Padding="0,0,0,10">
+			<Label
+				Text="AI Chat"
+				FontSize="24"
+				FontAttributes="Bold"
+				HorizontalOptions="Center" />
+
+			<HorizontalStackLayout
+				Spacing="10"
+				HorizontalOptions="Center">
+				<Button
+					Text="Load Model"
+					Command="{Binding LoadModelCommand}" />
+
+				<Button
+					Text="Download Phi-3 (CPU)"
+					Command="{Binding DownloadModelCommand}"
+					IsEnabled="{Binding IsNotDownloading}" />
+			</HorizontalStackLayout>
+
+			<!-- Download Progress -->
+			<VerticalStackLayout
+				Spacing="5"
+				IsVisible="{Binding IsDownloading}">
+				<Label
+					Text="{Binding DownloadStatus}"
+					FontSize="12"
+					HorizontalOptions="Center" />
+				<ProgressBar
+					Progress="{Binding DownloadProgress}"
+					ProgressColor="{AppThemeBinding Light=Blue, Dark=LightBlue}"
+					HorizontalOptions="Fill" />
+			</VerticalStackLayout>
+
+			<Label
+				Text="{Binding StatusMessage}"
+				MaximumHeightRequest="50"
+				FontSize="12"
+				TextColor="Gray"
+				HorizontalOptions="Center"
+				HorizontalTextAlignment="Center" />
+
+			<BoxView
+				HeightRequest="1" />
+
+			<!-- System Prompt / Persona -->
+			<VerticalStackLayout
+				Spacing="5">
+				<Label
+					Text="System Persona:"
+					FontSize="12"
+					FontAttributes="Bold" />
+				<Editor
+					Text="{Binding SystemPrompt}"
+					Placeholder="e.g. You are a pirate."
+					AutoSize="TextChanges"
+					MaximumHeightRequest="80"
+					FontSize="12"
+					BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#1E1E1E}" />
+			</VerticalStackLayout>
+
+			<BoxView
+				HeightRequest="1" />
+		</VerticalStackLayout>
+
+		<!-- Chat Area -->
+		<CollectionView
+			Grid.Row="1"
+			ItemsSource="{Binding Messages}"
+			Margin="0,5">
+			<CollectionView.ItemsLayout>
+				<LinearItemsLayout
+					Orientation="Vertical"
+					ItemSpacing="10" />
+			</CollectionView.ItemsLayout>
+			<CollectionView.ItemTemplate>
+				<DataTemplate
+					x:DataType="vm:UiChatMessage">
+					<VerticalStackLayout
+						Padding="10,5">
+						<Label
+							Text="{Binding ChatRole}"
+							FontSize="10"
+							TextColor="Gray"
+							Margin="5,0" />
+						<Border
+							Padding="15"
+							StrokeShape="RoundRectangle 10"
+							BackgroundColor="{AppThemeBinding Light=#F0F0F0, Dark=#2C2C2C}"
+							StrokeThickness="0">
+							<Label
+								Text="{Binding StreamingText}"
+								FontSize="14" />
+							<Border.Triggers>
+								<DataTrigger
+									Binding="{Binding ChatRole}"
+									Value="assistant"
+									TargetType="Border">
+									<Setter
+										Property="HorizontalOptions"
+										Value="Start" />
+								</DataTrigger>
+								<DataTrigger
+									Binding="{Binding ChatRole}"
+									Value="user"
+									TargetType="Border">
+									<Setter
+										Property="HorizontalOptions"
+										Value="End" />
+								</DataTrigger>
+							</Border.Triggers>
+						</Border>
+					</VerticalStackLayout>
+				</DataTemplate>
+			</CollectionView.ItemTemplate>
+		</CollectionView>
+
+		<!-- Thinking Indicator Overlay -->
+		<ActivityIndicator
+			Grid.Row="1"
+			IsRunning="{Binding IsProcessing}"
+			IsVisible="{Binding IsProcessing}"
+			HorizontalOptions="Center"
+			VerticalOptions="Center"
+			Color="{AppThemeBinding Light=Blue, Dark=LightBlue}"
+			HeightRequest="40"
+			WidthRequest="40" />
+
+		<!-- Input Area -->
+		<Grid
+			Grid.Row="2"
+			ColumnDefinitions="*,Auto"
+			ColumnSpacing="10"
+			Padding="0,10,0,0">
+			<Editor
+				Grid.Column="0"
+				Text="{Binding UserInput}"
+				Placeholder="Type a message..."
+				AutoSize="TextChanges"
+				MaximumHeightRequest="100" />
+
+			<Button
+				Grid.Column="1"
+				Text="Send"
+				Command="{Binding SendMessageCommand}"
+				VerticalOptions="End" />
+		</Grid>
+	</Grid>
+
+</ContentPage>
